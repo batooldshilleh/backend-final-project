@@ -1,0 +1,73 @@
+version: "3.8"
+services:
+  mongo:
+    image: mongo:6
+    container_name: metrics_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend_stateless_http1:
+    build: .
+    container_name: backend_stateless_http1
+    environment:
+      - MODE=stateless
+      - MONGO_URI=mongodb://mongo:27017/metrics_db
+      - HTTP_PORT=3100
+      - HTTPS_PORT=7100
+    depends_on:
+      - mongo
+    ports:
+      - "3100:3100"   # HTTP/1.1 target for k6
+      - "7100:7100"   # HTTPS port (for completeness)
+
+  backend_stateful_http1:
+    build: .
+    container_name: backend_stateful_http1
+    environment:
+      - MODE=stateful
+      - AGG_BATCH_SIZE=500
+      - AGG_FLUSH_INTERVAL_MS=1000
+      - MONGO_URI=mongodb://mongo:27017/metrics_db
+      - HTTP_PORT=3200
+      - HTTPS_PORT=7200
+    depends_on:
+      - mongo
+    ports:
+      - "3200:3200"
+      - "7200:7200"
+
+  backend_stateless_http2:
+    build: .
+    container_name: backend_stateless_http2
+    environment:
+      - MODE=stateless
+      - MONGO_URI=mongodb://mongo:27017/metrics_db
+      - HTTP_PORT=3300
+      - HTTPS_PORT=7300
+    depends_on:
+      - mongo
+    ports:
+      - "3300:3300"
+      - "7300:7300"
+
+  backend_stateful_http2:
+    build: .
+    container_name: backend_stateful_http2
+    environment:
+      - MODE=stateful
+      - AGG_BATCH_SIZE=500
+      - AGG_FLUSH_INTERVAL_MS=1000
+      - MONGO_URI=mongodb://mongo:27017/metrics_db
+      - HTTP_PORT=3400
+      - HTTPS_PORT=7400
+    depends_on:
+      - mongo
+    ports:
+      - "3400:3400"
+      - "7400:7400"
+
+volumes:
+  mongo_data:

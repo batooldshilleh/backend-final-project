@@ -1,11 +1,11 @@
-import express from "express";
-import cors from "cors";
+import express from 'express';
+import metricRoutes from './routes/metricRoutes.js';
+import { connectDB } from './infrastructure/database/mongoClient.js';
 
 const app = express();
-
-app.use(cors());
 app.use(express.json());
+app.use('/api/metrics', metricRoutes);
 
-
+connectDB();
 
 export default app;
